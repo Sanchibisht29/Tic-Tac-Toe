@@ -14,7 +14,6 @@ const winCombos = [
 
 const cells = document.querySelectorAll('.cell');
 startGame();
-
 function startGame() {
 	document.querySelector(".endgame").style.display = "none";
 	origBoard = Array.from(Array(9).keys());
@@ -52,6 +51,7 @@ function checkWin(board, player) {
 	return gameWon;
 }
 
+
 function gameOver(gameWon) {
 	for (let index of winCombos[gameWon.index]) {
 		document.getElementById(index).style.backgroundColor =
@@ -72,8 +72,27 @@ function emptySquares() {
 	return origBoard.filter(s => typeof s == 'number');
 }
 
+// function bestSpot() {
+// 	console.log( typeof(minimax(origBoard, aiPlayer).index));
+// 	return minimax(origBoard, aiPlayer).index;
+// }
 function bestSpot() {
-	return minimax(origBoard, aiPlayer).index;
+	let bestScore=-Infinity;
+	var move;
+	let i;
+	for( i=0;i<9;i++){
+		let s;
+		if(typeof(origBoard[i])=='number'){
+        origBoard[i]=aiPlayer;
+		 s=minimax(origBoard,false);
+		origBoard[i]=i;
+		if(s>bestScore){
+			 move=i;
+			 bestScore=s;
+		}
+		}
+	}
+	return move;
 }
 
 function checkTie() {
@@ -88,53 +107,96 @@ function checkTie() {
 	return false;
 }
 
-function minimax(newBoard, player) {
-	var availSpots = emptySquares();
+// function minimax(newBoard, player) {
+// 	var availSpots = emptySquares();
 
-	if (checkWin(newBoard, huPlayer)) {
-		return {score: -10};
+// 	if (checkWin(newBoard, huPlayer)) {
+// 		return {score: -10};
+// 	} else if (checkWin(newBoard, aiPlayer)) {
+// 		return {score: 10};
+// 	} else if (availSpots.length === 0) {
+// 		return {score: 0};
+// 	}
+// 	var moves = [];
+// 	for (var i = 0; i < availSpots.length; i++) {
+// 		var move = {};
+// 		move.index = newBoard[availSpots[i]];
+// 		newBoard[availSpots[i]] = player;
+
+// 		if (player == aiPlayer) {
+// 			var result = minimax(newBoard, huPlayer);
+// 			move.score = result.score;
+// 		} else {
+// 			var result = minimax(newBoard, aiPlayer);
+// 			move.score = result.score;
+// 		}
+
+// 		newBoard[availSpots[i]] = move.index;
+
+// 		moves.push(move);
+// 	}
+
+// 	var bestMove;
+// 	if(player === aiPlayer) {
+// 		var bestScore = -10000;
+// 		for(var i = 0; i < moves.length; i++) {
+// 			if (moves[i].score > bestScore) {
+// 				bestScore = moves[i].score;
+// 				bestMove = i;
+// 			}
+// 		}
+// 	} else {
+// 		var bestScore = 10000;
+// 		for(var i = 0; i < moves.length; i++) {
+// 			if (moves[i].score < bestScore) {
+// 				bestScore = moves[i].score;
+// 				bestMove = i;
+// 			}
+// 		}
+// 	}
+
+// 	return moves[bestMove];
+// }
+
+function minimax(newBoard, max) {
+	// console.log(winner(newBoard, huPlayer));
+	if (checkWin(newBoard,huPlayer)) {
+		return -10;
 	} else if (checkWin(newBoard, aiPlayer)) {
-		return {score: 10};
-	} else if (availSpots.length === 0) {
-		return {score: 0};
-	}
-	var moves = [];
-	for (var i = 0; i < availSpots.length; i++) {
-		var move = {};
-		move.index = newBoard[availSpots[i]];
-		newBoard[availSpots[i]] = player;
-
-		if (player == aiPlayer) {
-			var result = minimax(newBoard, huPlayer);
-			move.score = result.score;
-		} else {
-			var result = minimax(newBoard, aiPlayer);
-			move.score = result.score;
-		}
-
-		newBoard[availSpots[i]] = move.index;
-
-		moves.push(move);
-	}
-
-	var bestMove;
-	if(player === aiPlayer) {
-		var bestScore = -10000;
-		for(var i = 0; i < moves.length; i++) {
-			if (moves[i].score > bestScore) {
-				bestScore = moves[i].score;
-				bestMove = i;
-			}
-		}
+		return 10;
 	} else {
-		var bestScore = 10000;
-		for(var i = 0; i < moves.length; i++) {
-			if (moves[i].score < bestScore) {
-				bestScore = moves[i].score;
-				bestMove = i;
+		let i,ans=true;
+		for( i=0;i<9;i++){
+			if(newBoard[i]==i){
+			ans=false;
 			}
 		}
+		if(ans){
+		return 0;
+		}
 	}
-
-	return moves[bestMove];
+	if(max){
+		let bestScore=-Infinity;
+	for(var i=0;i<9;i++){
+	if(typeof(newBoard[i])=='number'){
+		newBoard[i]=aiPlayer;
+		let s=minimax(newBoard,false);
+		bestScore=Math.max(bestScore,s);
+		newBoard[i]=i;
+	}
+	}
+	return bestScore;
+}
+else{
+	let bestScore=Infinity;
+	for(var i=0;i<9;i++){
+	if(typeof(newBoard[i])=='number'){
+		newBoard[i]=huPlayer;
+		let s=minimax(newBoard,true);
+		bestScore=Math.min(bestScore,s);
+		newBoard[i]=i;
+	}
+	}
+	return bestScore;
+}
 }
